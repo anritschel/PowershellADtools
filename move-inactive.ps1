@@ -21,7 +21,7 @@ else{
 }
 
 Get-ADUser -Filter * -Properties "LastLogonDate" |ForEach-Object{
-If ($_.LastLogonDate -lt $today.AddDays(-90){
+If ($_.LastLogonDate -lt $today.AddDays(-90)){
     $inactive += $_.name
     Move-ADObject $_.ObjectGUID -TargetPath "OU=Inactive Users, $($domain.rootDomainNamingContext)"
     Set-ADUser $_.ObjectGUID -Enabled $false -Description "Acct disabled on $Today due to inactivity. User last logged in on $($_.LastLogonDate)"
