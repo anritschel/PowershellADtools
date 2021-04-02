@@ -18,6 +18,8 @@ Param(
 $adminPW = ConvertTo-SecureString $AdminPassword -AsPlainText -Force
 $Cred = New-Object System.Management.Automation.PSCredential ($AdminUserName, $adminPW) 
 
+$domain = get-adrootdse
+
 #check for azureAD module
 if(Get-Module -ListAvailable -Name AzureAD){
     Import-Module AzureAD
@@ -73,7 +75,7 @@ if($userList.Count -ne 0) {
 #do work in AD
 Set-ADAccountPassword -Identity $adAccount -Reset -NewPassword (ConvertTo-SecureString $newPassword)
 Disable-ADAccount -Identity $adAccount
-Get-ADUser $adAccount | Move-ADObject -TargetPath 'OU=Inactive Users,DC=enco,DC=local'
+Get-ADUser $adAccount | Move-ADObject -TargetPath "OU=Inactive Users, $($domain.rootDomainNamingContext)"
 
 
 Remove-PsSession $Session
