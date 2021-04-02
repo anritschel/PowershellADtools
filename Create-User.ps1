@@ -20,6 +20,7 @@ $Cred = New-Object System.Management.Automation.PSCredential ($AdminUserName, $a
 
 $domain = get-adrootdse
 $fullName = "$($firstName) $($LastName)"
+
 #check for azureAD module
 if(Get-Module -ListAvailable -Name AzureAD){
     Import-Module AzureAD
@@ -37,13 +38,13 @@ else{
     Install-Module msonline
     Import-Module msonline
 }
-
-$exists = $false
-$counter = 0
-while ($exists = $false) {
-    $userName = "$($FirstName.substring(0,$counter))$($LastName)"
+$userName = ""
+$exists = $true
+$counter = 1
+while ($exists -eq $true) {
+    $userName = $FirstName.substring(0,$counter)+$LastName
     try {
-        Get-ADUser - -Identity $userName
+        Get-ADUser $userName
         $exists = $true
     }
     catch [Microsoft.ActiveDirectory.Management.ADIdentityResolutionException] {
@@ -52,7 +53,7 @@ while ($exists = $false) {
     $counter +=1
 }
 
+write-host $userName
+New-ADUser -Name $FullName -GivenName $firstName -Surname $LastName -SamAccountName $userName -AccountPassword (ConvertTo-SecureString $newPassword -AsPlainText -Force) -Enabled $true
 
-New-ADUser -Name $FullName -GivenName $firstName -Surname $LastName -SamAccountName $userName -AccountPassword $newPassword -Enabled $true
-
-Get-ADUser -Identity $userName | Move-ADObject $_.ObjectGUID -TargetPath 'OU=Sora,DC=enco,DC=local'
+Get-ADUser -Identity $userName | Move-ADObject -TargetPath "OU=Sora, $($domain.rootDomainNamingContext)"
