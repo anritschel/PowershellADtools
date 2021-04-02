@@ -4,7 +4,6 @@ Param(
     [string]$path
 )
 
-$PWord = ConvertTo-SecureString -String "jdqxmvjnmvlfzdcb1!" -AsPlainText -Force
 $fromEmail = "Alerts@soratech.com"
 $Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $fromEmail, $PWord
 
