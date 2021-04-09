@@ -4,9 +4,9 @@ Param(
     [string]$path
 )
 
-$fromEmail = "Alerts@soratech.com"
-$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $fromEmail, $PWord
-
+$secrets = Get-Content ./secrets.txt | Out-String | Invoke-Expression
+$PWord = ConvertTo-SecureString -String $secrets.PassWord -AsPlainText -Force
+$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $secrets.user, $PWord
 $subject = "NTFS Permission audit - $($env:COMPUTERNAME) on Path $($path)"
 $EmailMessage = "<style>
 		table {
@@ -20,9 +20,6 @@ $EmailMessage = "<style>
 		}
 	</style>
 <p>The following NFTS Permissions were recorded for $($path), add to the appropriate company's information</p>"
-$smtpServer = "smtp.office365.com"
-$smtpPort = 587
-$toEmail = "aritschel@soratech.com"
 $EmailMessage += "<table><tr><td>path</td><td>User</td><td>Access</td></tr><tr><td>$($path)"
 
 $aclPermission = (Get-ACL $path).Access 
@@ -36,4 +33,4 @@ $EmailMessage += "</tr></table></html>"
 
 
     
-Send-MailMessage -from $fromEmail -to $toEmail -SmtpServer $smtpServer -Port $smtpPort -Credential $Credential -Subject $subject -Body $EmailMessage -UseSsl -BodyAsHtml
+Send-MailMessage -from $secrets.User -to $secrets.to -SmtpServer $secrets.smtpServer -Port $secrets.smtpPort -Credential $Credential -Subject $subject -Body $EmailMessage -UseSsl -BodyAsHtml

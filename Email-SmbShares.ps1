@@ -1,8 +1,8 @@
 ﻿
-
-$User = "Alerts@soratech.com"
-$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $User, $PWord
-
+$secrets = Get-Content ./secrets.txt | Out-String | Invoke-Expression
+#$PWord = ConvertTo-SecureString -String $secrets.PassWord -AsPlainText -Force
+$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $secrets.user, (ConvertTo-SecureString -String $secrets.PassWord -AsPlainText -Force)
+$subject = "SMB Share Discovery - $($env:COMPUTERNAME)"
 
 
 $EmailMessage = "<style>
@@ -17,14 +17,10 @@ $EmailMessage = "<style>
 		}
 	</style>
 <p>The following SMB shares were discovered, add to the appropriate company's information</p>"
-$smtpServer = "smtp.office365.com"
-$smtpPort = 587
-
 
 $data = @()
 
 Get-SmbShare | ForEach-Object{
-	Write-Host "Hello"
 	$access = get-SMBShareAccess -Name $_.Name
 	$smbObject = [PSCustomObject]@{
 		Name = $_.Name
@@ -40,4 +36,4 @@ Get-SmbShare | ForEach-Object{
 $emailMessage += "</html>"
 
     
-Send-MailMessage -from $User -to "aritschel@soratech.com" -SmtpServer "smtp.office365.com" -Port 587 -Credential $Credential -Subject "SMB Share Discovery - $($env:COMPUTERNAME)" -Body $EmailMessage -UseSsl -BodyAsHtml
+Send-MailMessage -from $secrets.User -to $secrets.to -SmtpServer $secrets.smtpServer -Port $secrets.smtpPort -Credential $Credential -Subject $subject -Body $EmailMessage -UseSsl -BodyAsHtml
