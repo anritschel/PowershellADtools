@@ -5,8 +5,7 @@ Param(
 )
 
 $secrets = Get-Content ./secrets.txt | Out-String | Invoke-Expression
-$PWord = ConvertTo-SecureString -String $secrets.PassWord -AsPlainText -Force
-$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $secrets.user, $PWord
+$Credential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $secrets.user, (ConvertTo-SecureString -String $secrets.PassWord -AsPlainText -Force)
 $subject = "NTFS Permission audit - $($env:COMPUTERNAME) on Path $($path)"
 $EmailMessage = "<style>
 		table {
