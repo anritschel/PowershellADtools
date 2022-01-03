@@ -16,7 +16,7 @@ else{
     Import-Module activedirectory
 }
 
-Get-ADUser -Filter * -Properties "LastLogonDate" |ForEach-Object{
+Get-ADUser -Filter * -Properties "LastLogonDate" | Where-Object { ($_.DistinguishedName -notlike "*OU=Inactive Users") -AND ($_.DistinguishedName -notlike "*OU=Remote Users" ) } | ForEach-Object{
 If ($_.LastLogonDate -lt $today.AddDays(-90)){
     $inactive += $_.name
     Move-ADObject $_.ObjectGUID -TargetPath "OU=Inactive Users, $($domain.rootDomainNamingContext)"
